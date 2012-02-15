@@ -13,6 +13,9 @@ CURRENCY_CHOICES = (
 class Category(Model):
     name = models.CharField(max_length=1024)
 
+    def __unicode__(self):
+        return self.name
+
 
 class Product(Model):
     name = models.CharField(max_length=1024)
