@@ -1,6 +1,6 @@
-from djangorestframework.mixins import InstanceMixin, DeleteModelMixin, ListModelMixin, PaginatorMixin
+from djangorestframework.mixins import InstanceMixin, DeleteModelMixin, ListModelMixin
 from djangorestframework.views import ModelView
-from serenesiri.mixins import CreateModelMixin, ReadModelMixin, UpdateModelMixin, UpdateOrCreateModelMixin
+from serenesiri.mixins import CreateModelMixin, ReadModelMixin, UpdateModelMixin, UpdateOrCreateModelMixin, PaginatorMixin
 
 
 class InstanceModelView(InstanceMixin, ReadModelMixin, UpdateModelMixin, DeleteModelMixin, ModelView):
@@ -11,8 +11,8 @@ class CreatableInstanceModelView(InstanceMixin, ReadModelMixin, UpdateOrCreateMo
     pass
 
 
-class ListOrCreateModelView(ListModelMixin, CreateModelMixin, PaginatorMixin, ModelView):
-    limit = 5
+class PaginatedListOrCreateModelView(ListModelMixin, CreateModelMixin, PaginatorMixin, ModelView):
+    pass
 
-    def filter_response(self, obj):
-        return super(ListOrCreateModelView, self).filter_response(obj)
+class ListOrCreateModelView(ListModelMixin, CreateModelMixin, ModelView):
+    pass
