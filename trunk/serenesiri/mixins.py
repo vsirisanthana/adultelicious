@@ -1,6 +1,12 @@
 from djangorestframework import status
-from djangorestframework.mixins import ModelMixin as DrfModelMixin, ReadModelMixin as DrfReadModelMixin, CreateModelMixin as DrfCreateModelMixin
+from djangorestframework.mixins import (
+    ModelMixin as DrfModelMixin,
+    ReadModelMixin as DrfReadModelMixin,
+    CreateModelMixin as DrfCreateModelMixin,
+    PaginatorMixin as DrfPaginatorMixin,
+)
 from djangorestframework.response import ErrorResponse, Response
+from urlobject import URLObject
 
 
 class ReadModelMixin(DrfReadModelMixin):
@@ -52,3 +58,61 @@ class CreateModelMixin(DrfCreateModelMixin):
             'Content-Location': self.resource(self).url(response.raw_content)
         })
         return response
+
+
+class PaginatorMixin(DrfPaginatorMixin):
+
+    def first(self, page):
+        """
+        Returns a url to the first page of results
+        """
+        return self.url_with_page_number(1)
+
+    def url_with_page_number(self, page_number):
+        """
+        Constructs a url used for getting the next/previous urls,
+        replacing page & limit with updated number
+        """
+        url = URLObject.parse(self.request.build_absolute_uri(self.request.path))
+
+        queries = dict(self.request.GET)
+
+        print 'q', queries
+
+        if queries.has_key('page'):
+            del queries['page']
+
+        url |= queries
+
+
+        if page_number != 1:
+            url |= 'page', page_number
+
+        limit = self.get_limit()
+        if limit != self.limit:
+            url |= 'limit', limit
+
+        return url
+
+    def serialize_page_info(self, page):
+        """
+        This is some useful information that is added to the response
+        """
+        links = []
+        if self.next(page):
+            links.append({'href': self.next(page), 'rel': 'next'})
+
+        if self.previous(page):
+            links.append({'href': self.previous(page), 'rel': 'previous'})
+
+        if self.first(page):
+            links.append({'href': self.first(page), 'rel': 'first'})
+
+
+        return {
+            'links': links,
+            'page': page.number,
+            'pages': page.paginator.num_pages,
+            'per_page': self.get_limit(),
+            'total': page.paginator.count,
+        }
