@@ -7,7 +7,6 @@ class ModelResource(DrfModelResource):
     exclude = ()
     include = ('links',)
     related_serializer = RelatedSerializer
-    _links = {}
 
     def links(self, instance):
         self._links['self'] = {
