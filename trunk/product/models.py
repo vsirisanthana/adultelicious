@@ -15,11 +15,19 @@ class Category(models.Model):
     def __unicode__(self):
         return self.name
 
+    @models.permalink
+    def get_absolute_url(self):
+        return ('category_instance', (), {'id': self.id})
+
 
 class Product(models.Model):
     name = models.CharField(max_length=1024)
     category = models.ForeignKey(Category)
     description = models.TextField()
+
+    @models.permalink
+    def get_absolute_url(self):
+        return ('product_instance', (), {'id': self.id})
 
 
 class Price(models.Model):
