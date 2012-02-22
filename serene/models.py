@@ -6,3 +6,7 @@ class Model(Model):
 
     class Meta:
         abstract = True
+
+    @permalink
+    def get_absolute_url(self):
+        raise NotImplementedError
