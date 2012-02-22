@@ -1,5 +1,5 @@
 from django.conf.urls.defaults import patterns, url
-from serenesiri.views import CreatableInstanceModelView, PaginatedListOrCreateModelView
+from serene.views import CreatableInstanceModelView, PaginatedListOrCreateModelView
 
 from product.resources import CategoryResource, ProductResource, PriceResource
 

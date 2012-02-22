@@ -1,6 +1,6 @@
 from djangorestframework.mixins import InstanceMixin, DeleteModelMixin, ListModelMixin
 from djangorestframework.views import ModelView
-from serenesiri.mixins import CreateModelMixin, ReadModelMixin, UpdateModelMixin, UpdateOrCreateModelMixin, PaginatorMixin
+from serene.mixins import CreateModelMixin, ReadModelMixin, UpdateModelMixin, UpdateOrCreateModelMixin, PaginatorMixin
 
 
 class InstanceModelView(InstanceMixin, ReadModelMixin, UpdateModelMixin, DeleteModelMixin, ModelView):

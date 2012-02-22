@@ -123,7 +123,7 @@ INSTALLED_APPS = (
     'coverage',
     'django_nose',
     'djangorestframework',
-    'serenesiri',
+    'serene',
     'product',
 )
 

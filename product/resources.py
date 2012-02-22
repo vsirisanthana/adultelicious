@@ -1,4 +1,4 @@
-from serenesiri.resources import ModelResource
+from serene.resources import ModelResource
 from product.models import Category, Product, Price
 
 
