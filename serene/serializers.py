@@ -12,11 +12,12 @@ class RelatedSerializer(Serializer):
             return {
                 'id': instance.id,
                 'title': unicode(instance),
-                'links':{
-                    'href': instance.get_absolute_url(),
-                    'rel': 'self'
+                'links': {
+                    'self': {
+                        'href': instance.get_absolute_url(),
+                        'rel': 'self',
+                    }
                 },
-                'url': instance.get_absolute_url(),
             }
         else:
             return super(RelatedSerializer, self).serialize_model(instance)
