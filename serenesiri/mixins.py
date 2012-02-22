@@ -6,7 +6,7 @@ from djangorestframework.mixins import (
     PaginatorMixin as DrfPaginatorMixin,
 )
 from djangorestframework.response import ErrorResponse, Response
-from urlobject import URLObject
+from enhancedurlobject import EnhancedURLObject
 
 
 class ReadModelMixin(DrfReadModelMixin):
@@ -24,7 +24,6 @@ class UpdateModelMixin(DrfModelMixin):
         model = self.resource.model
         try:
             self.model_instance = self.get_object(*args, **kwargs)
-
             for (key, val) in self.CONTENT.items():
                 setattr(self.model_instance, key, val)
         except model.DoesNotExist:
@@ -34,12 +33,13 @@ class UpdateModelMixin(DrfModelMixin):
 
 
 class UpdateOrCreateModelMixin(DrfModelMixin):
-
+    """
+    Behavior to update or create a `model` instance on PUT requests
+    """
     def put(self, request, *args, **kwargs):
         model = self.resource.model
         try:
             self.model_instance = self.get_object(*args, **kwargs)
-
             for (key, val) in self.CONTENT.items():
                 setattr(self.model_instance, key, val)
         except model.DoesNotExist:
@@ -68,25 +68,23 @@ class PaginatorMixin(DrfPaginatorMixin):
         """
         return self.url_with_page_number(1)
 
+    def last(self, page):
+        """
+        Returns a url to the last page of results
+        """
+        return self.url_with_page_number(page.paginator.num_pages)
+
     def url_with_page_number(self, page_number):
         """
         Constructs a url used for getting the next/previous urls,
         replacing page & limit with updated number
         """
-        url = URLObject.parse(self.request.build_absolute_uri(self.request.path))
-
-        queries = dict(self.request.GET)
-
-        print 'q', queries
-
-        if queries.has_key('page'):
-            del queries['page']
-
-        url |= queries
-
+        url = EnhancedURLObject.parse(self.request.build_absolute_uri())
 
         if page_number != 1:
             url |= 'page', page_number
+        else:
+            url -= 'page'
 
         limit = self.get_limit()
         if limit != self.limit:
@@ -98,16 +96,23 @@ class PaginatorMixin(DrfPaginatorMixin):
         """
         This is some useful information that is added to the response
         """
-        links = []
-        if self.next(page):
-            links.append({'href': self.next(page), 'rel': 'next'})
+        links = [{'href': self.request.build_absolute_uri(), 'rel': 'self'}]
 
-        if self.previous(page):
-            links.append({'href': self.previous(page), 'rel': 'previous'})
+        next_page = self.next(page)
+        if next_page:
+            links.append({'href': next_page, 'rel': 'next'})
 
-        if self.first(page):
-            links.append({'href': self.first(page), 'rel': 'first'})
+        previous_page = self.previous(page)
+        if previous_page:
+            links.append({'href': previous_page, 'rel': 'previous'})
 
+        first_page = self.first(page)
+        if first_page:
+            links.append({'href': first_page, 'rel': 'first'})
+
+        last_page = self.last(page)
+        if last_page:
+            links.append({'href': last_page, 'rel': 'last'})
 
         return {
             'links': links,
