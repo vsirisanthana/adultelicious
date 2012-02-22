@@ -6,10 +6,8 @@ from serenesiri.mixins import CreateModelMixin, ReadModelMixin, UpdateModelMixin
 class InstanceModelView(InstanceMixin, ReadModelMixin, UpdateModelMixin, DeleteModelMixin, ModelView):
     pass
 
-
 class CreatableInstanceModelView(InstanceMixin, ReadModelMixin, UpdateOrCreateModelMixin, DeleteModelMixin, ModelView):
     pass
-
 
 class PaginatedListOrCreateModelView(ListModelMixin, CreateModelMixin, PaginatorMixin, ModelView):
     pass
