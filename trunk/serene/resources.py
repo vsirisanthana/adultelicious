@@ -1,12 +1,11 @@
 from django.db import models
 from djangorestframework.resources import ModelResource as DrfModelResource
-from djangorestframework.serializer import _SkipField
 from serene.serializers import RelatedSerializer
 
 
 class ModelResource(DrfModelResource):
     exclude = ()
-    include = ('links', 'url')
+    include = ('links',)
     related_serializer = RelatedSerializer
     _links = {}
 
@@ -24,14 +23,11 @@ class ModelResource(DrfModelResource):
     def serialize_val(self, key, obj):
         serialized_val = super(ModelResource, self).serialize_val(key, obj)
         if isinstance(obj, models.Model):
-            link = dict(serialized_val)
-            link['rel'] = key
-            link['href'] = link['links']['href']
-            del link['id']
-            del link['links']
-            self._links[key] = link
-
-            del serialized_val['links']
+            self._links[key] = {
+                'href': serialized_val['links']['self']['href'],
+                'rel': key,
+                'title': serialized_val['title'],
+            }
             return serialized_val
         else:
             return serialized_val
