@@ -6,7 +6,7 @@ from serene.serializers import RelatedSerializer
 
 class ModelResource(DrfModelResource):
     exclude = ()
-    include = ('links',)
+    include = ('links', 'url')
     related_serializer = RelatedSerializer
     _links = {}
 
@@ -31,7 +31,7 @@ class ModelResource(DrfModelResource):
             del link['links']
             self._links[key] = link
 
-#            del serialized_val['href']
+            del serialized_val['links']
             return serialized_val
         else:
             return serialized_val
