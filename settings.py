@@ -1,5 +1,10 @@
 # Django settings for adultelicious project.
 
+import os
+
+PROJECT_PATH = os.path.abspath( os.path.dirname(__file__) )
+join_with_project_path = lambda a, *p: os.path.join(PROJECT_PATH, a, *p)
+
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
@@ -12,7 +17,7 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'adultelicious.db',                      # Or path to database file if using sqlite3.
+        'NAME': join_with_project_path('adultelicious.db'),                 # Or path to database file if using sqlite3.
         'USER': '',                      # Not used with sqlite3.
         'PASSWORD': '',                  # Not used with sqlite3.
         'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
@@ -151,3 +156,11 @@ LOGGING = {
 }
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+
+# Caching
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': join_with_project_path('.cache'),
+    }
+}
