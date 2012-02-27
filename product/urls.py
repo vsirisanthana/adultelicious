@@ -5,9 +5,11 @@ from serene.views import CreatableInstanceModelView, PaginatedListOrCreateModelV
 from product.resources import CategoryResource, ProductResource, PriceResource
 
 
+# TODO: cache_page breaks urlreverse
+
 urlpatterns = patterns('',
-    url(r'^categories/?$', cache_page(15)(PaginatedListOrCreateModelView.as_view(resource=CategoryResource)), name='category_list_or_create'),
-    url(r'^categories/(?P<id>\d+)/?$', cache_page(15)(CreatableInstanceModelView.as_view(resource=CategoryResource)), name='category_instance'),
-    url(r'^products/?$', cache_page(15)(PaginatedListOrCreateModelView.as_view(resource=ProductResource)), name='product_list_or_create'),
-    url(r'^products/(?P<id>\d+)/?$', cache_page(15)(CreatableInstanceModelView.as_view(resource=ProductResource)), name='product_instance'),
+    url(r'^categories/?$', PaginatedListOrCreateModelView.as_view(resource=CategoryResource), name='category_list_or_create'),
+    url(r'^categories/(?P<id>\d+)/?$', CreatableInstanceModelView.as_view(resource=CategoryResource), name='category_instance'),
+    url(r'^products/?$', PaginatedListOrCreateModelView.as_view(resource=ProductResource), name='product_list_or_create'),
+    url(r'^products/(?P<id>\d+)/?$', CreatableInstanceModelView.as_view(resource=ProductResource), name='product_instance'),
 )
