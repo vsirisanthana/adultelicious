@@ -2,7 +2,7 @@ from django.conf import settings
 from django.test.client import RequestFactory
 from djangorestframework.response import ErrorResponse
 from djangorestframework.tests.testcases import SettingsTestCase
-from serene.mixins import ReadModelMixin, UpdateModelMixin, UpdateOrCreateModelMixin
+from serene.mixins import ReadModelMixin, UpdateModelMixin, UpdateOrCreateModelMixin, CreateModelMixin
 from serene.resources import ModelResource
 from serene.tests.models import DummyModel
 
@@ -115,7 +115,7 @@ class TestUpdateOrCreateModelMixin(TestMixinsBase):
         with self.assertRaises(DummyModel.DoesNotExist):
             DummyModel.objects.get(id=999)
 
-        self.assertEqual(DummyModel.objects.all().count(), 1)
+        self.assertEqual(DummyModel.objects.count(), 1)
         update_data = {'name': 'new_dummy'}
         request = self.req.put('/dummy/999', data=update_data)
         self.mixin.CONTENT = update_data
@@ -125,7 +125,37 @@ class TestUpdateOrCreateModelMixin(TestMixinsBase):
         self.assertEqual(response.status, 201)
         new_dummy = DummyModel.objects.get(id=999)
         self.assertEqual(new_dummy.name, 'new_dummy')
-        self.assertEqual(DummyModel.objects.all().count(), 2)
+        self.assertEqual(DummyModel.objects.count(), 2)
 
+class TestCreateModelMixin(TestMixinsBase):
+
+    def setUp(self):
+        super(TestCreateModelMixin, self).setUp()
+        self.dummy = DummyModel.objects.create(name='dummy1')
+
+        class DummyResource(ModelResource):
+            model = DummyModel
+
+            def url(self, instance):
+                return '/dummy/%s' % instance.id
+        self.mixin = CreateModelMixin()
+        self.mixin.resource = DummyResource
+
+    def test_post_to_create_must_return_content_location_header(self):
+
+        with self.assertRaises(DummyModel.DoesNotExist):
+            DummyModel.objects.get(name='new_dummy')
+
+        self.assertEqual(DummyModel.objects.count(), 1)
+        form_data = {'name': 'new_dummy'}
+        request = self.req.post('/dummies', data=form_data)
+        self.mixin.CONTENT = form_data
+
+        response = self.mixin.post(request)
+        self.assertEqual(DummyModel.objects.count(), 2)
+        self.assertEqual(response.status, 201)
+        self.assertEqual(response.cleaned_content.name, 'new_dummy')
+        self.assertTrue(response.headers.has_key('Content-Location'))
+        self.assertEqual(response.headers['Content-Location'], '/dummy/2')
 
 
