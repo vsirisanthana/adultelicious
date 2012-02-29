@@ -1,6 +1,9 @@
-- setup.py : to make serene pip installable
+- setup.py : to make serene pip installable --- DONE!!!
 - fix cache_page breaks urlresolver
 - handle if-modified-since header
 - handle if-none-match header
 - upgrade djangorestframework and urlobject --- DONE!!!
 - update requirement.txt --- DONE!!!
+
+NICE TO HAVE
+- Remove djangorestframework dependency in settings.py
