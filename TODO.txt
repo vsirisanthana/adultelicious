@@ -1,0 +1,6 @@
+- setup.py : to make serene pip installable
+- fix cache_page breaks urlresolver
+- handle if-modified-since header
+- handle if-none-match header
+- upgrade djangorestframework and urlobject
+- update requirement.txt
