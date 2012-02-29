@@ -129,6 +129,7 @@ INSTALLED_APPS = (
     'django_nose',
     'djangorestframework',
     'serene',
+
     'product',
 )
 

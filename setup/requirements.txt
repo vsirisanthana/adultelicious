@@ -1,6 +1,5 @@
 coverage
 django
 django-nose
-djangorestframework>=0.3.3
-urlobject>=2.0.0
+https://django-serene.googlecode.com/svn/trunk/
 yolk
