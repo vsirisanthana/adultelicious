@@ -164,3 +164,6 @@ CACHES = {
         'LOCATION': join_with_project_path('.cache'),
     }
 }
+
+# ETag
+USE_ETAGS = True

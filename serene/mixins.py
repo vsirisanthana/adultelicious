@@ -6,7 +6,7 @@ from djangorestframework.mixins import (
     PaginatorMixin as DrfPaginatorMixin,
 )
 from djangorestframework.response import ErrorResponse, Response
-from enhancedurlobject import EnhancedURLObject
+from urlobject import URLObject
 
 
 class ReadModelMixin(DrfReadModelMixin):
@@ -23,7 +23,7 @@ class UpdateModelMixin(DrfModelMixin):
     def put(self, request, *args, **kwargs):
         model = self.resource.model
         try:
-            self.model_instance = self.get_object(*args, **kwargs)
+            self.model_instance = self.get_instance(*args, **kwargs)
             for (key, val) in self.CONTENT.items():
                 setattr(self.model_instance, key, val)
         except model.DoesNotExist:
@@ -39,7 +39,7 @@ class UpdateOrCreateModelMixin(DrfModelMixin):
     def put(self, request, *args, **kwargs):
         model = self.resource.model
         try:
-            self.model_instance = self.get_object(*args, **kwargs)
+            self.model_instance = self.get_instance(*args, **kwargs)
             for (key, val) in self.CONTENT.items():
                 setattr(self.model_instance, key, val)
         except model.DoesNotExist:
@@ -79,16 +79,16 @@ class PaginatorMixin(DrfPaginatorMixin):
         Constructs a url used for getting the next/previous urls,
         replacing page & limit with updated number
         """
-        url = EnhancedURLObject.parse(self.request.build_absolute_uri())
+        url = URLObject(self.request.build_absolute_uri())
 
         if page_number != 1:
-            url |= 'page', page_number
+            url = url.set_query_param('page', unicode(page_number))
         else:
-            url -= 'page'
+            url = url.del_query_param('page')
 
         limit = self.get_limit()
         if limit != self.limit:
-            url |= 'limit', limit
+            url = url.set_query_param('limit', unicode(limit))
 
         return url
 
