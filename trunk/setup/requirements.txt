@@ -1,5 +1,6 @@
 coverage
 django
 django-nose
-djangorestframework
+djangorestframework>=0.3.3
+urlobject>=2.0.0
 yolk
