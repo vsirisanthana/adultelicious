@@ -96,23 +96,23 @@ class PaginatorMixin(DrfPaginatorMixin):
         """
         This is some useful information that is added to the response
         """
-        links = [{'href': self.request.build_absolute_uri(), 'rel': 'self'}]
+        links = {'self': {'href': self.request.build_absolute_uri(), 'rel': 'self'}}
 
         next_page = self.next(page)
         if next_page:
-            links.append({'href': next_page, 'rel': 'next'})
+            links['next'] = {'href': next_page, 'rel': 'next'}
 
         previous_page = self.previous(page)
         if previous_page:
-            links.append({'href': previous_page, 'rel': 'previous'})
+            links['previous'] = {'href': previous_page, 'rel': 'previous'}
 
         first_page = self.first(page)
         if first_page:
-            links.append({'href': first_page, 'rel': 'first'})
+            links['first'] = {'href': first_page, 'rel': 'first'}
 
         last_page = self.last(page)
         if last_page:
-            links.append({'href': last_page, 'rel': 'last'})
+            links['last'] = {'href': last_page, 'rel': 'last'}
 
         return {
             'links': links,

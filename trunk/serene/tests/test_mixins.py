@@ -1,8 +1,11 @@
 from django.conf import settings
 from django.test.client import RequestFactory
+from django.utils import simplejson as json
+from django.utils.unittest.case import TestCase
 from djangorestframework.response import ErrorResponse
 from djangorestframework.tests.testcases import SettingsTestCase
-from serene.mixins import ReadModelMixin, UpdateModelMixin, UpdateOrCreateModelMixin, CreateModelMixin
+from djangorestframework.views import View
+from serene.mixins import ReadModelMixin, UpdateModelMixin, UpdateOrCreateModelMixin, CreateModelMixin, PaginatorMixin
 from serene.resources import ModelResource
 from serene.tests.models import DummyModel
 
@@ -159,3 +162,121 @@ class TestCreateModelMixin(TestMixinsBase):
         self.assertEqual(response.headers['Content-Location'], '/dummy/2')
 
 
+class MockPaginatorView(PaginatorMixin, View):
+    total = 60
+
+    def get(self, request):
+        return range(0, self.total)
+
+class TestPaginatorMixin(TestCase):
+    def setUp(self):
+        self.req = RequestFactory()
+
+    def _assert_links(self, links, rel, href):
+        self.assertEqual(links[rel]['rel'], rel)
+        self.assertEqual(links[rel]['href'], href)
+
+
+    def _assert_page_info(self, content, expected_pages, expected_page, expected_total, expected_per_page):
+        self.assertEqual(content['page'], expected_page)
+        self.assertEqual(content['pages'], expected_pages)
+        self.assertEqual(content['per_page'], expected_per_page)
+        self.assertEqual(content['total'], expected_total)
+
+    def test_paginator_mixin_return_nav_info_first_page(self):
+        """
+        Paginator mixin should return navigation links including
+        self, first, last, next, previous when applicable
+        also information of page, total pages, total number of objects, how many object per page
+        - First page should not return  prev navigation link
+        """
+        request = self.req.get('/paginator')
+        response = MockPaginatorView.as_view(limit=10)(request)
+        content = json.loads(response.content)
+
+        self._assert_page_info(content, 6, 1, 60, 10)
+        self.assertTrue(content.has_key('links'))
+        links = content['links']
+
+        #assert self
+        self.assertTrue(links.has_key('self'))
+        self._assert_links(links, 'self', 'http://testserver/paginator')
+
+        #assert next
+        self.assertTrue(links.has_key('next'))
+        self._assert_links(links, 'next', 'http://testserver/paginator?page=2')
+
+        #assert no prev
+        self.assertFalse(links.has_key('previous'))
+
+        #assert first
+        self.assertTrue(links.has_key('first'))
+        self._assert_links(links, 'first','http://testserver/paginator')
+
+        #assert last
+        self.assertTrue(links.has_key('last'))
+        self._assert_links(links, 'last', 'http://testserver/paginator?page=6')
+
+    def test_paginator_mixin_return_nav_info_last_page(self):
+        """
+        Paginator mixin should return navigation links including
+        self, first, last, next, previous when applicable
+        - Last page should not have next navigation link
+        """
+        request = self.req.get('/paginator?page=3')
+        response = MockPaginatorView.as_view(limit=20)(request)
+        content = json.loads(response.content)
+
+        self._assert_page_info(content, 3, 3, 60, 20)
+        self.assertTrue(content.has_key('links'))
+        links = content['links']
+
+        #assert self
+        self.assertTrue(links.has_key('self'))
+        self._assert_links(links, 'self', 'http://testserver/paginator?page=3')
+
+        #assert no next
+        self.assertFalse(links.has_key('next'))
+
+        #assert prev
+        self.assertTrue(links.has_key('previous'))
+        self._assert_links(links, 'previous', 'http://testserver/paginator?page=2')
+
+        #assert first
+        self.assertTrue(links.has_key('first'))
+        self._assert_links(links, 'first','http://testserver/paginator')
+
+        #assert last
+        self.assertTrue(links.has_key('last'))
+        self._assert_links(links, 'last', 'http://testserver/paginator?page=3')
+
+    def test_paginator_mixin_return_nav_info_only_one_page(self):
+        """
+        Paginator mixin should return navigation links.
+        If there's only one page, paginator should not return navigation links for prev and next
+        """
+        request = self.req.get('/paginator')
+        response = MockPaginatorView.as_view(limit=60)(request)
+        content = json.loads(response.content)
+
+        self._assert_page_info(content, 1, 1, 60, 60)
+        self.assertTrue(content.has_key('links'))
+        links = content['links']
+
+        #assert self
+        self.assertTrue(links.has_key('self'))
+        self._assert_links(links, 'self', 'http://testserver/paginator')
+
+        #assert no next
+        self.assertFalse(links.has_key('next'))
+
+        #assert no prev
+        self.assertFalse(links.has_key('previous'))
+
+        #assert first
+        self.assertTrue(links.has_key('first'))
+        self._assert_links(links, 'first','http://testserver/paginator')
+
+        #assert last
+        self.assertTrue(links.has_key('last'))
+        self._assert_links(links, 'last', 'http://testserver/paginator')
